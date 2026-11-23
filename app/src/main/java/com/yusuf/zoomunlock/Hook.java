@@ -13,6 +13,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 public class Hook implements IXposedHookLoadPackage {
     private static final float NEW_MAX = 30.0f;
+    private static final int EV_LIMIT = 48;
     private static final String T = "ZoomUnlock";
     private static final Set<String> seen = new HashSet<>();
 
@@ -29,6 +30,16 @@ public class Hook implements IXposedHookLoadPackage {
                             Object res = p.getResult();
                             if (res == null) return;
                             String name = ((CameraCharacteristics.Key<?>) p.args[0]).getName();
+
+                            if (name.equals("android.control.aeCompensationRange") && res instanceof Range) {
+                                Range<?> r = (Range<?>) res;
+                                if (((Number) r.getUpper()).intValue() == 24) {
+                                    p.setResult(new Range<Integer>(-EV_LIMIT, EV_LIMIT));
+                                    Log.i(T, "patched EV range");
+                                }
+                                return;
+                            }
+
                             if (!name.toLowerCase().contains("zoom")) return;
                             String val = (res instanceof float[]) ? Arrays.toString((float[]) res) : String.valueOf(res);
                             if (seen.add(name + val)) Log.i(T, "read " + name + " = " + val);
@@ -42,7 +53,8 @@ public class Hook implements IXposedHookLoadPackage {
                             } else if (rangeKey && res instanceof float[]) {
                                 float[] a = ((float[]) res).clone();
                                 if (a.length == 2 && a[1] == 10.0f) { a[1] = NEW_MAX; p.setResult(a); Log.i(T, "patched " + name); }
-                            } else if (((name.equals("android.scaler.availableMaxDigitalZoom") || name.equals("xiaomi.smoothTransition.xiaomiSatMaxZoom")) || name.equals("xiaomi.smoothTransition.xiaomiSatMaxZoom"))
+                            } else if ((name.equals("android.scaler.availableMaxDigitalZoom")
+                                    || name.equals("xiaomi.smoothTransition.xiaomiSatMaxZoom"))
                                     && res instanceof Float && ((Float) res) == 10.0f) {
                                 p.setResult(NEW_MAX); Log.i(T, "patched " + name);
                             }
