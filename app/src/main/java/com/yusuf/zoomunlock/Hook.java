@@ -42,7 +42,7 @@ public class Hook implements IXposedHookLoadPackage {
                             } else if (rangeKey && res instanceof float[]) {
                                 float[] a = ((float[]) res).clone();
                                 if (a.length == 2 && a[1] == 10.0f) { a[1] = NEW_MAX; p.setResult(a); Log.i(T, "patched " + name); }
-                            } else if ((name.equals("android.scaler.availableMaxDigitalZoom") || name.equals("xiaomi.smoothTransition.xiaomiSatMaxZoom"))
+                            } else if (((name.equals("android.scaler.availableMaxDigitalZoom") || name.equals("xiaomi.smoothTransition.xiaomiSatMaxZoom")) || name.equals("xiaomi.smoothTransition.xiaomiSatMaxZoom"))
                                     && res instanceof Float && ((Float) res) == 10.0f) {
                                 p.setResult(NEW_MAX); Log.i(T, "patched " + name);
                             }
