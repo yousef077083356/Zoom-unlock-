@@ -12,7 +12,7 @@ import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 public class Hook implements IXposedHookLoadPackage {
-    private static final float NEW_MAX = 80.0f;
+    private static final float NEW_MAX = 20.0f;
     private static final int EV_LIMIT = 48;
     private static final String T = "ZoomUnlock";
     private static final Set<String> seen = new HashSet<>();
